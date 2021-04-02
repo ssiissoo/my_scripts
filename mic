@@ -1,0 +1,63 @@
+#!/bin/python
+import subprocess
+
+
+def list2dic(l):
+	out = {}
+	k = ''
+	v = ''
+	for i in l:
+		if not len(i) == 0:
+			if i[0] == '\t' or i[:8] == '        ':
+				v += '\n' + i.strip()
+			elif i.find(':') > -1:
+				if not k == '':
+					out[k.strip()] = v.strip()
+				k, v = tuple(i.split(':', 1))
+	return out
+
+def cmd(c):
+	out = ''
+	o = subprocess.Popen(c, stdout=subprocess.PIPE)
+	for i in o.stdout:
+		out += i.decode(encoding='utf-8', errors='ignore')
+	o.wait()
+	return out.strip()
+
+def get_sources():
+	sources = {}
+	new_source = []
+	for i in cmd(['pactl', 'list']).split('\n'):
+		if i.replace('Source #', '').strip().isdigit():
+			new_source = [i]
+		elif not len(i) == 0 and i[0] == '\t' and not len(new_source) == 0:
+			new_source += [i]
+		elif (not len(i) == 0 and not i[0] == '\t' and not len(new_source) == 0) or (len(i) == 0 and not len(new_source) == 0):
+			sources[new_source[0].replace('Source #', '').strip()] = list2dic([i.replace('\t', '', 1) for i in new_source[1:]])
+			new_source = []
+	return sources
+
+def get_info():
+	inf = cmd(['pactl', 'info'])
+	o = {}
+	for i in inf.split('\n'):
+		o[i.split(':')[0].strip()] = i.split(':', 1)[1].strip()
+	return o
+
+def get_default_source():
+	so = get_sources()
+	inf = get_info()
+	for i in so.keys():
+		if so[i]['Name'] == inf['Default Source']:
+			return so[i]
+
+def yn(s):
+	if s == 'yes':
+		return True
+	elif s == 'no':
+		return False
+
+if __name__ == '__main__':
+	mic = get_default_source()
+	if not mic == None:
+		print(('' if not yn(mic['Mute']) else '' )+ ' [' + format(int(mic['Volume'].split('/')[1].split('%')[0].strip()), '03d') + ']')
