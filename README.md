@@ -25,3 +25,11 @@ A simple script that gets the volume of your default output device and places a 
 ## mic
 
 Same as vol with your default input device.
+
+## audio
+
+This script lets you mange your audio devices via dmenu. It's written in quite a crappy style but works. I will have to rewrite this some day
+
+## bluetoothctl
+
+This manages your bluetooth devices via dmenu. It too is crappy and very incomplete but enough for my usecases.

@@ -1,0 +1,103 @@
+#!/bin/python3
+import subprocess, time
+
+def cmd(c):
+	out = ''
+	o = subprocess.Popen(c, stdout=subprocess.PIPE)
+	for i in o.stdout:
+		out += i.decode(encoding='utf-8', errors='ignore')
+	o.wait()
+	return out.strip()
+	
+def get_bt_dev():
+	bt = cmd(['bluetoothctl', 'paired-devices'])
+	bt_dev = []
+	for i in bt.split('\n'):
+		if i[:7] == 'Device ':
+			bt_dev += [i.replace('Device ', '')[18:]]
+	return [f"{i} {j}" for i, j in enumerate(bt_dev)]
+
+def address_from_name(name):
+	bt = cmd(['bluetoothctl', 'paired-devices'])
+	bt_name = []
+	bt_address = []
+	for i in bt.split('\n'):
+		if i[:7] == 'Device ':
+			bt_name += [i.replace('Device ', '')[18:]]
+			bt_address += [i.replace('Device ', '')[:17]]
+	bt_name = [f"{i} {j}" for i, j in enumerate(bt_name)]
+	for i, j in enumerate(bt_name):
+		if j == name:
+			return bt_address[i]
+	return None
+
+def get_connected_bt_dev():
+	bt = cmd(['bluetoothctl', 'paired-devices'])
+	bt_name = []
+	bt_address = []
+	bt_con = []
+	for i in bt.split('\n'):
+		if i[:7] == 'Device ':
+			bt_name += [i.replace('Device ', '')[18:]]
+			bt_address += [i.replace('Device ', '')[:18]]
+			for i in cmd(['bluetoothctl', 'info', i.replace('Device ', '')[:17]]).split('\n'):
+				if i.strip()[:11] == 'Connected: ':
+					if i.strip()[11:] == 'yes':
+						bt_con += [True]
+					elif i.strip()[11:] == 'no':
+						bt_con += [False]
+					else:
+						bt_con += [None]
+	bt_name = [f"{i} {j}" for i, j in enumerate(bt_name)]
+	out = []
+	for i, j in enumerate(bt_con):
+		if j:
+			out += [bt_name[i]]
+	return out
+
+def get_bt_power_state():
+	for i in cmd(['bluetoothctl', 'show']).split('\n'):
+		if i.strip()[:9] == 'Powered: ':
+			if i.strip()[9:] == 'no':
+				return False
+			elif i.strip()[9:] == 'yes':
+				return True
+	return None
+
+def dmenu(option, query):
+	c = ''
+	if type(option) == type([]):
+		c = ''.join([str(i) + '\n' for i in option]).strip()
+	elif type(option) == type(''):
+		c = option
+	else:
+		return None
+	return cmd(['/home/s/.script/dmenusel', c.replace('\n', '\\n'), query, 'sans:size=14'])
+
+
+to_do = []
+if get_bt_power_state():
+	to_do += ['power off']
+else:
+	to_do += ['power on']
+to_do += ['connect', 'disconnect']
+do_do = dmenu(to_do, 'bluetoothctlctl')
+
+if do_do == 'power on':
+	cmd(['bluetoothctl', 'power', 'on'])
+elif do_do == 'power off':
+	cmd(['bluetoothctl', 'power', 'off'])
+elif do_do == 'connect':
+	if not get_bt_power_state():
+		cmd(['bluetoothctl', 'power', 'on'])
+		time.sleep(1)
+	bt_dev = get_bt_dev()
+	a = dmenu(bt_dev, 'connect to')
+	if a in bt_dev:
+		cmd(['bluetoothctl', 'connect', address_from_name(a)])
+elif do_do == 'disconnect':
+	con_bt_dev = get_connected_bt_dev()
+	if len(con_bt_dev) > 0:
+		a = dmenu(get_connected_bt_dev(), 'disconnect from')
+		if a in con_bt_dev:
+			cmd(['bluetoothctl', 'disconnect', address_from_name(a)])

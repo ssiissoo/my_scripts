@@ -1,0 +1,86 @@
+#!/bin/python3
+import subprocess, os
+
+
+def cmd(c):
+	out = ''
+	o = subprocess.Popen(c, stdout=subprocess.PIPE)
+	for i in o.stdout:
+		out += i.decode(encoding='utf-8', errors='ignore')
+	o.wait()
+	return out.strip()
+
+
+def dmenu(option, query):
+	c = ''
+	if type(option) == type([]):
+		c = ''.join([str(i) + '\n' for i in option]).strip()
+	elif type(option) == type(''):
+		c = option
+	else:
+		return None
+	return cmd(['/home/s/.script/dmenusel', c.replace('\n', '\\n'), query, 'sans:size=14'])
+
+def list2dic(l):
+	out = {}
+	k = ''
+	v = ''
+	for i in l:
+		if not len(i) == 0:
+			if i[0] == '\t' or i[:8] == '        ':
+				v += '\n' + i.strip()
+			elif i.find(':') > -1:
+				if not k == '':
+					out[k.strip()] = v.strip()
+				k, v = tuple(i.split(':', 1))
+	return out
+	
+def get_sinks():
+	sinks = {}
+	new_sink = []
+	for i in cmd(['pactl', 'list']).split('\n'):
+		if i.replace('Sink', '').replace('#', '').strip().isdigit():
+			new_sink = [i]
+		elif not len(i) == 0 and i[0] == '\t' and not len(new_sink) == 0:
+			new_sink += [i]
+		elif (not len(i) == 0 and not i[0] == '\t' and not len(new_sink) == 0) or (len(i) == 0 and not len(new_sink) == 0):
+			sinks[new_sink[0].replace('Sink #', '').strip()] = list2dic([i.replace('\t', '', 1) for i in new_sink[1:]])
+			new_sink = []
+	return sinks
+
+def get_sources():
+	sources = {}
+	new_source = []
+	for i in cmd(['pactl', 'list']).split('\n'):
+		if i.replace('Source #', '').strip().isdigit():
+			new_source = [i]
+		elif not len(i) == 0 and i[0] == '\t' and not len(new_source) == 0:
+			new_source += [i]
+		elif (not len(i) == 0 and not i[0] == '\t' and not len(new_source) == 0) or (len(i) == 0 and not len(new_source) == 0):
+			sources[new_source[0].replace('Source #', '').strip()] = list2dic([i.replace('\t', '', 1) for i in new_source[1:]])
+			new_source = []
+	return sources
+
+def trunk(s, l):
+	if len(s) > l:
+		return s[:l - 1] + '…'
+	else:
+		return s
+
+if __name__ == '__main__':
+	to_do = ['change sink', 'change source']
+	do_do = dmenu(to_do, 'audioctl')
+	if do_do == 'change sink':
+		si = get_sinks()
+		l = [f"{i} {trunk(si[i]['Description'], 20)}" for i in si.keys()]
+		s = dmenu(l, 'select output sink')
+		if s in l:
+			cmd(['pactl', 'set-default-sink', s.split(' ')[0]])
+			cmd(['kill', '-44', cmd(['pidof', 'dwmblocks'])])
+	elif do_do == 'change source':
+		so = get_sources()
+		l = [f"{i} {trunk(so[i]['Description'], 20)}" for i in so.keys()]
+		s = dmenu(l, 'select source')
+		if s in l:
+			cmd(['pactl', 'set-default-source', s.split(' ')[0]])
+			cmd(['kill', '-45', cmd(['pidof', 'dwmblocks'])])
