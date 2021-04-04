@@ -33,3 +33,7 @@ This script lets you mange your audio devices via dmenu. It's written in quite a
 ## bluetoothctl
 
 This manages your bluetooth devices via dmenu. It too is crappy and very incomplete but enough for my usecases.
+
+## bat
+
+Displays battery levels for a two battery setup.
