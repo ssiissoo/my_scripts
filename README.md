@@ -37,3 +37,7 @@ This manages your bluetooth devices via dmenu. It too is crappy and very incompl
 ## bat
 
 Displays battery levels for a two battery setup.
+
+## xp-pen_driver
+
+A script that detects when a xp-pen graphics tablet is plugged in an automaticly opens the configuration.
