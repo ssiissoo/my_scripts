@@ -1,0 +1,60 @@
+#!/bin/sh
+
+offline () {
+	echo '[off]'
+	exit
+}
+
+na (){
+	echo '[n/a]'
+	exit
+}
+
+mpc status 2> /dev/null > /dev/null || offline
+
+[[ $(mpc status | wc -l) == 3 ]] || na
+
+[ $(mpc status | awk 'NR==2 {print $1}') != '[playing]' ] && PLAY="" ||
+	PLAY=""
+VOL=$([ $(mpc status | awk 'NR==3 {print $1}' | sed 's/volume://g' |
+	sed 's/%//g') == 100 ] 2> /dev/null && echo 100 ||
+	echo $(mpc status | awk 'NR==3 {print $2}' | sed 's/%//g'))
+
+if [[ $VOL -gt 99 ]]
+then
+	V="A"
+elif [[ $VOL -gt 89 ]]
+then
+	V="9"
+elif [[ $VOL -gt 79 ]]
+then
+	V="8"
+elif [[ $VOL -gt 69 ]]
+then
+	V="7"
+elif [[ $VOL -gt 59 ]]
+then
+	V="6"
+elif [[ $VOL -gt 49 ]]
+then
+	V="5"
+elif [[ $VOL -gt 39 ]]
+then
+	V="4"
+elif [[ $VOL -gt 29 ]]
+then
+	V="3"
+elif [[ $VOL -gt 19 ]]
+then
+	V="2"
+elif [[ $VOL -gt 9 ]]
+then
+	V="1"
+elif [[ $VOL -gt 0 ]]
+then
+	V="0"
+else
+	V="M"
+fi
+
+echo "[${PLAY} ${V}]"
