@@ -65,3 +65,8 @@ Like `mpc next` but with notification.
 ## mpd_prev
 
 Analogous to mpd_skip
+
+## bat_warn
+
+A script, that warns one if the total battery level is less than 15 upon
+execution.
