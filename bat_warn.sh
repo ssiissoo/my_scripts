@@ -9,7 +9,14 @@ lvl1=$(upower -i /org/freedesktop/UPower/devices/battery_BAT1 |
 	 grep -o '[0-9]\+')
 total=$(($lvl0 + $lvl1))
 
+charging=`upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep state: | awk '{gsub(/\s*state:\s*/,"");}1'`
+
+if [ $charging == "charging" ]
+then
+	exit 0
+fi
+
 if [ $total -lt 15 ];
 then
-	notify-send -u 'critical' "Battery Warning" "Your total battery capacity is below 15%!"
+	sudo -u s DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus notify-send -u 'critical' "Battery Warning" "Your total battery capacity is below 15%!"
 fi
