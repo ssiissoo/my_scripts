@@ -4,7 +4,7 @@ while [ true ]
 do
 	if ls /dev | grep hidraw && pidof dwm
 	then
-		pidof Pentablet_Driver || sudo /home/s/.tablet_driver/Pentablet_Driver &
+		pidof Pentablet_Driver || sudo $HOME/.tablet_driver/Pentablet_Driver &
 	else
 		pidof Pentablet_Driver && sudo killall Pentablet_Driver
 	fi

@@ -70,3 +70,15 @@ Analogous to mpd_skip
 
 A script, that warns one if the total battery level is less than 15 upon
 execution.
+
+## contactman
+
+A contact manager, which uses dmenu and reads from card dav files in the .rolo
+folder. rolo is a nice commandline program to manipulate card dav files.
+
+## screenie
+
+Lets you take screenshots using scrot. dmenu asks whether the entire screen
+should be selected or a region and whether the screenshot should be copied
+or you want to do ocr on it using tesseract. Make sure to change the path to
+suit your computer.
