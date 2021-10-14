@@ -82,3 +82,8 @@ Lets you take screenshots using scrot. dmenu asks whether the entire screen
 should be selected or a region and whether the screenshot should be copied
 or you want to do ocr on it using tesseract. Make sure to change the path to
 suit your computer.
+
+## formman
+
+This is a WIP project which is supposed to be able to save often used formulas
+and lets you manipulate it using sympy python.
