@@ -1,0 +1,74 @@
+#!/bin/sh
+
+while :
+do
+
+if [ $1 == 'song' ]
+then
+	echo 'very well, name the poor artist'
+	read artist
+	mkdir "/home/s/music/$artist" 2> /dev/null
+	mkdir "/home/s/music/$artist/misc" 2> /dev/null
+	echo "now, name the title of the song, or leave blank to try your luck"
+	read title
+	if [[ $title == "" ]]
+	then
+		echo "searching for title…"
+		title=$(youtube-dl --get-title "$(xclip -o -sel clip)" |
+			sed 's/\(.*\) '"$artist"'/\1/I
+			s/\(.*\) -/\1/
+			s/\(.*\) (official [a-z]*\s*[a-z]*)/\1/I
+			s/\(.*\) (official)/\1/I
+			s/\(.*\) (lyric [a-z]*\s*[a-z]*)/\1/I
+			s/\(.*\) \[official [a-z]*\s*[a-z]*\]/\1/I
+			s/\(.*\) \[official\]/\1/I
+			s/\(.*\) \[lyric [a-z]*\s*[a-z]*\]/\1/I
+			s/\(.*\) (audio)/\1/I
+			s/\(.*\) \[audio\]/\1/I
+			s/\(.*\) (remastered [0-9]*)/\1/I
+			s/\(.*\) \[remastered [0-9]*\]/\1/I
+			s/\(.*\) .mp3/\1.mp3/')
+		echo "The title shall now be: \"$title\""
+	fi
+	ls "/home/s/music/$artist/misc/$title.mp3" 2> /dev/null &&
+		echo "file already exists, no downloading" ||
+		echo "stealing in background" &&
+		youtube-dl -o "/home/s/music/$artist/misc/$title.%(ext)s" --audio-format mp3 -x "$(xclip -o -sel clip)" > /dev/null &&
+		eyeD3 -t "$title" -a "$artist" "/home/s/music/$artist/misc/$title.mp3" > /dev/null &
+	sleep 1
+	echo "steal another song? [Y, n]"
+	read call
+	if [[ $call == "" ]]
+	then
+		echo "next"
+	elif [ $call == "n" ]
+	then
+		break
+	fi
+elif [ $1 == 'album' ]
+then
+	echo 'very well, name the poor artist'
+	read artist
+	mkdir "/home/s/music/$artist" 2> /dev/null
+	echo 'good, now name the album'
+	read album
+	mkdir "/home/s/music/$artist/$album" 2> /dev/null ||
+		echo "warning, such a folder already exists!"
+	youtube-dl -o "/home/s/music/$artist/$album/%(playlist_index)s. %(title)s.%(ext)s" --audio-format mp3 -x "$(xclip -o -sel clip)" > /dev/null &&
+	/home/s/custom_script/tagger "/home/s/music/$artist/$album" > /dev/null &
+	echo "steal another album? [Y, n]"
+	read call
+	if [[ $call == "" ]]
+	then
+		echo "next"
+	elif [ $call == "n" ]
+	then
+		break
+	fi
+
+else
+	echo 'What are you stealing?'
+fi
+
+done
+exit 0

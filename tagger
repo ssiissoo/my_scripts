@@ -1,0 +1,30 @@
+#!/bin/sh
+
+cd "$1"
+
+artist=$(pwd | awk -F '/' '{print $5}')
+album=$(pwd | awk -F '/' '{print $6}')
+
+ls | sed 's/\([^*]*\)/mv "\1" "\1"/
+		s/\(.*\) '"$artist"'/\1/I
+		s/\(.*\) -/\1/
+		s/\(.*\) (official [a-z]*\s*[a-z]*)/\1/I
+		s/\(.*\) (official)/\1/I
+		s/\(.*\) (lyric [a-z]*\s*[a-z]*)/\1/I
+		s/\(.*\) \[official [a-z]*\s*[a-z]*\]/\1/I
+		s/\(.*\) \[official\]/\1/I
+		s/\(.*\) \[lyric [a-z]*\s*[a-z]*\]/\1/I
+		s/\(.*\) (audio)/\1/I
+		s/\(.*\) \[audio\]/\1/I
+		s/\(.*\) (remastered [0-9]*)/\1/I
+		s/\(.*\) \[remastered [0-9]*\]/\1/I
+		s/\(.*\) .mp3/\1.mp3/' | sh
+
+for file in *.mp3
+do
+track=$(echo $file | awk -F '.' '{print $1}')
+
+title=$(echo $file | sed 's/[0-9]*\. //
+				s/.mp3//')
+eyeD3 -t "$title" -n "$track" -a "$artist" -A "$album" "$file"
+done

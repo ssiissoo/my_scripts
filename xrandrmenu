@@ -1,0 +1,66 @@
+#!/bin/sh
+
+mons=$(xrandr | grep -E '\sconnected' | awk '{print $1}')
+opts=$(echo -e "done\noff\nleft-of\nright-of\nabove\nbelow\nsame-as\nbrightness\nrotate\nmode\nreflect")
+
+mon=$(echo -e "$mons\nauto" | dmenu -p 'select monitor or auto') || exit 0
+[ "$mon" = "auto" ] && xrandr --auto && exit 0
+
+choic=none
+exe="xrandr --output $mon "
+
+while [ "$choic" != "done" ]; do
+    choic=$(echo "$opts" | dmenu -p "$exe") || exit 0
+    [ "$choic" != "done" ] || continue
+    exe+="--$choic "
+    case $choic in
+	off)
+	    eval "$exe" && exit
+	    ;;
+	left-of)
+	    mon2=$(echo -e "$mons" | grep -v "$mon" | dmenu -p "$exe") || exit 0
+	    exe+="$mon2 "
+	    ;;
+	right-of)
+	    mon2=$(echo -e "$mons" | grep -v "$mon" | dmenu -p "$exe") || exit 0
+	    exe+="$mon2 "
+	    ;;
+	above)
+	    mon2=$(echo -e "$mons" | grep -v "$mon" | dmenu -p "$exe") || exit 0
+	    exe+="$mon2 "
+	    ;;
+	below)
+	    mon2=$(echo -e "$mons" | grep -v "$mon" | dmenu -p "$exe") || exit 0
+	    exe+="$mon2 "
+	    ;;
+	same-as)
+	    mon2=$(echo -e "$mons" | grep -v "$mon" | dmenu -p "$exe") || exit 0
+	    exe+="$mon2 "
+	    ;;
+	brightness)
+	    b=$(echo -e "" | dmenu -p "$exe") || exit 0
+	    exe+="$b "
+	    ;;
+	rotate)
+	    r=$(echo -e "normal\nleft\nright\ninverted" | dmenu -p "$exe") || exit 0
+	    exe+="$r "
+	    ;;
+	reflect)
+	    r=$(echo -e "normal\nx\ny\nxy" | dmenu -p "$exe") || exit 0
+	    exe+="$r "
+	    ;;
+	mode)
+	    modes=$(xrandr |
+			tail -n `expr $(xrandr |
+			wc -l) - $(xrandr |
+			grep -nF "$mon" |
+			grep -oE '^[0-9]*')` |
+			grep -oE '[0-9]+x[0-9]+')
+	    mode=$(echo -e "$modes" | dmenu -p "$exe") || exit 0
+	    exe+="$mode "
+	    ;;
+    esac
+    
+done
+
+eval "$exe"

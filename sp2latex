@@ -1,0 +1,25 @@
+#!/bin/python3
+from sympy import *
+from argparse import ArgumentParser
+import re
+
+desc = """
+small program that tries to convert python math syntax to latex
+"""
+hlp = """
+the phython syntax formula to convert
+"""
+
+par = ArgumentParser(description=desc)
+par.add_argument('formula', metavar='F', type=str, nargs=1, help=hlp)
+
+p = re.compile(r'[a-zA-Z]+\w*_?\w*')
+
+if __name__ == '__main__':
+	form = par.parse_args().formula[0]
+	sym = list(set(p.findall(form)).difference(set(dir())))
+	exec(f"{', '.join(sym)} = symbols(' '.join(sym))")
+	if '=' in form:
+		print(latex(Eq(eval(form.split('=')[0]), eval(form.split('=')[1]))))
+	else:
+		print(latex(eval(form)))

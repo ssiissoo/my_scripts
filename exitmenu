@@ -1,0 +1,7 @@
+#!/bin/sh
+
+choice=$(echo -e "shutdown\nreboot" | dmenu -p "exit")
+case $choice in
+    "shutdown") sudo shutdown now;;
+    "reboot") sudo reboot ;;
+esac
