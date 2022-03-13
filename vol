@@ -1,76 +1,19 @@
-#!/bin/python3
-import subprocess
+#!/bin/sh
 
+#case $1 in
+#    "+") pamixer -i 5;;
+#    "-") pamixer -d 5;;
+#    "t") pamixer -t ;;
+#esac
 
-def cmd(c):
-	out = ''
-	o = subprocess.Popen(c, stdout=subprocess.PIPE)
-	for i in o.stdout:
-		out += i.decode(encoding='utf-8', errors='ignore')
-	o.wait()
-	return out.strip()
+pref=$([[ $(pamixer --get-mute) == "true" ]] && echo "M" || echo "V")
+perc=$(pamixer --get-volume)
 
+if [[ $perc == "100" ]]; then
+    perc="MX"
+elif [[ $perc -lt "10" ]]; then
+    perc="0$perc"
+fi
 
-def dmenu(option, query):
-	c = ''
-	if type(option) == type([]):
-		c = ''.join([str(i) + '\n' for i in option]).strip()
-	elif type(option) == type(''):
-		c = option
-	else:
-		return None
-	return cmd(['/home/s/.script/dmenusel', c.replace('\n', '\\n'), query, 'sans:size=14'])
-
-def list2dic(l):
-	out = {}
-	k = ''
-	v = ''
-	for i in l:
-		if not len(i) == 0:
-			if i[0] == '\t' or i[:8] == '        ':
-				v += '\n' + i.strip()
-			elif i.find(':') > -1:
-				if not k == '':
-					out[k.strip()] = v.strip()
-				k, v = tuple(i.split(':', 1))
-	return out
-	
-def get_sinks():
-	sinks = {}
-	new_sink = []
-	for i in cmd(['pactl', 'list']).split('\n'):
-		if i.replace('Sink', '').replace('#', '').strip().isdigit():
-			new_sink = [i]
-		elif not len(i) == 0 and i[0] == '\t' and not len(new_sink) == 0:
-			new_sink += [i]
-		elif (not len(i) == 0 and not i[0] == '\t' and not len(new_sink) == 0) or (len(i) == 0 and not len(new_sink) == 0):
-			sinks[new_sink[0].replace('Sink #', '').strip()] = list2dic([i.replace('\t', '', 1) for i in new_sink[1:]])
-			new_sink = []
-	return sinks
-
-def get_info():
-	inf = cmd(['pactl', 'info'])
-	o = {}
-	for i in inf.split('\n'):
-		o[i.split(':')[0].strip()] = i.split(':', 1)[1].strip()
-	return o
-
-def yn(s):
-	if s == 'yes':
-		return True
-	elif s == 'no':
-		return False
-
-def get_default_sink():
-	si = get_sinks()
-	inf = get_info()
-	for i in si.keys():
-		if si[i]['Name'] == inf['Default Sink']:
-			return si[i]
-
-if __name__ == '__main__':
-	try:
-		spk = get_default_sink()
-		print(('' if not yn(spk['Mute']) else '') + ' [' + format(int(spk['Volume'].split('/')[1].split('%')[0].strip()), '03d') + ']')
-	except:
-		print('[err]')
+#echo "$pref [$perc]" > /tmp/.volume-pipe
+echo "$pref [$perc]"

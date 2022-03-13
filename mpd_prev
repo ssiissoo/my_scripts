@@ -1,6 +1,0 @@
-#!/bin/sh
-
-mpc prev > /dev/null
-[[ $(mpc status | wc -l) == 3 ]] &&
-	notify-send "previous song" "$(mpc status | awk 'NR==1')" ||
-	notify-send "previous song" "N/A"

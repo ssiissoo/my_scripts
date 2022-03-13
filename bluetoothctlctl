@@ -1,5 +1,6 @@
 #!/bin/python3
 import subprocess, time
+from os import system
 
 def cmd(c):
 	out = ''
@@ -80,7 +81,7 @@ if get_bt_power_state():
 	to_do += ['power off']
 else:
 	to_do += ['power on']
-to_do += ['connect', 'disconnect']
+to_do += ['connect', 'disconnect', 'restart bluetooth']
 do_do = dmenu(to_do, 'bluetoothctlctl')
 
 if do_do == 'power on':
@@ -101,3 +102,5 @@ elif do_do == 'disconnect':
 		a = dmenu(get_connected_bt_dev(), 'disconnect from')
 		if a in con_bt_dev:
 			cmd(['bluetoothctl', 'disconnect', address_from_name(a)])
+elif do_do == 'restart bluetooth':
+	system("sudo systemctl restart bluetooth")

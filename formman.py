@@ -38,13 +38,13 @@ class Formula():
 			self.f = formula
 
 	def l(self):
-		print(latex(self.f))
+		lpr(latex(self.f))
 
 	def p(self):
 		print(self.f)
 
 	def pp(self):
-		pprint(self.f)
+		ppr(self.f)
 
 	def gauss_err(self):
 		for i in self.s:
@@ -54,6 +54,23 @@ class Formula():
 		gauss = sqrt(sum([(diff(self.f, i.s)*i.err)**2 for i in self.s if not i.exact]))
 		return Formula(f"Gauss error: {self.short_desc}", f"Gauss error: {self.long_desc}", gauss, self.s)
 
-# test
-f = Formula('test', 'test formula', "sin(x**2)", [Sym('x', 'x')])
-lpr(f.gauss_err().f)
+def gen_form():
+	print("Generating Formula")
+	form = input("type in formula to generate\n> ")
+	p = re.compile(r'[a-zA-Z]+\w*_?\w*')
+	pat = set(p.findall(form))
+	sym = pat.difference(set(dir()))
+	print(f"""reserved constants and funtions:
+{pat.symmetric_difference(sym)}
+custom constants:
+{sym}
+""" + '-' * 10)
+	s = [Sym(input(f"Short description for {i}\n> "),
+		i,
+		input(f"is {i} exact (1=True, 0=False, Default=1)\n> ")) for i in list(sym)]
+	print('-' * 10)
+	short_desc = input("type in a short description or a name for the formula\n> ")
+	long_desc = input("type in a detailed description for the formula")
+	return Formula(short_desc, long_desc, form, s)
+
+gen_form().p()

@@ -2,7 +2,7 @@
 
 while [ true ]
 do
-	if ls /dev | grep hidraw && pidof dwm
+	if ls /dev | grep hidraw && [[ "$(ps -aux | grep qtile | wc -l)" -gt 1 ]]
 	then
 		pidof Pentablet_Driver || sudo $HOME/.tablet_driver/Pentablet_Driver &
 	else
