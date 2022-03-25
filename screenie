@@ -1,6 +1,6 @@
 #!/bin/sh
 
-screenie_folder="$HOME/screenshot"
+screenie_folder="$HOME/scrt"
 opt=`echo -e "entire screen\nselect\nselect and copy\nselect and ocr" | dmenu -p "screenie"`
 case "$opt" in
 	"entire screen")
@@ -13,9 +13,9 @@ case "$opt" in
 		;;
 	"select and copy")
 		scrot --select $screenie_folder/$(date +'\%Y-\%m-\%d_\%H_\%M_\%S').png &&
-		xclip -sel clip -t image/png $screenie_folder/`ls /home/s/screenshot | tail -n 1` &&
-		xclip -sel primary -t image/png $screenie_folder/`ls /home/s/screenshot | tail -n 1` &&
-		xclip -sel secondary -t image/png $screenie_folder/`ls /home/s/screenshot | tail -n 1` &&
+		xclip -sel clip -t image/png $screenie_folder/`ls $screenie_folder | tail -n 1` &&
+		xclip -sel primary -t image/png $screenie_folder/`ls $screenie_folder | tail -n 1` &&
+		xclip -sel secondary -t image/png $screenie_folder/`ls $screenie_folder | tail -n 1` &&
 		notify-send -u low "screenie" "took screenshot of selection and copied it"
 		;;
 	"select and ocr")

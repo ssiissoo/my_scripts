@@ -1,0 +1,3 @@
+#!/bin/sh
+
+mv $(sxiv -o $1 | awk '{print $1}') $2

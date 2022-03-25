@@ -81,3 +81,7 @@ tags downloaded music
 ## xrandrmenu
 
 dmenu wizard for writing xrandr command
+
+## mvpics
+
+a tool using sxiv to move a bulk of manually selected images around
