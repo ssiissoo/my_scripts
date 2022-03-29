@@ -1,7 +1,8 @@
 #!/bin/sh
 
 screenie_folder="$HOME/scrt"
-opt=`echo -e "entire screen\nselect\nselect and copy\nselect and ocr" | dmenu -p "screenie"`
+fig_folder="$HOME/fig" # here my figures for org mode are permanently saved
+opt=`echo -e "entire screen\nselect\nselect and copy\nselect and ocr\nfor org mode" | dmenu -p "screenie"`
 case "$opt" in
 	"entire screen")
 		scrot $screenie_folder/$(date +'\%Y-\%m-\%d_\%H_\%M_\%S').png &&
@@ -27,5 +28,13 @@ case "$opt" in
 		xclip -o -sel clip | xclip -sel primary &&
 		xclip -o -sel clip | xclip -sel secondary &&
 		notify-send -u low "screenie" "done"
+		;;
+	"for org mode")
+		ind=`echo "" | dmenu -p "choose individual name"`
+		scrot --select $fig_folder/$(date +'\%Y-\%m-\%d_\%H_\%M_\%S')_$ind.png &&
+		echo "$fig_folder/`ls $fig_folder | tail -n 1`" | xclip -sel clip &&
+		echo "$fig_folder/`ls $fig_folder | tail -n 1`" | xclip -sel primary &&
+		echo "$fig_folder/`ls $fig_folder | tail -n 1`" | xclip -sel secondary &&
+		notify-send -u low "screenie" "took screenshot of selection and copied path to it"
 		;;
 esac
